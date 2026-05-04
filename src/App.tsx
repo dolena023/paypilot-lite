@@ -31,6 +31,7 @@ function getCurrentWeekMonday(): string {
 export default function App() {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState<Page>('home')
   const [employees, setEmployees] = useState<Employee[]>([])
   const [payrollRuns, setPayrollRuns] = useState<PayrollRun[]>([])
@@ -43,7 +44,6 @@ export default function App() {
   const [weekOf, setWeekOf] = useState<string>(getCurrentWeekMonday())
   const [viewingRun, setViewingRun] = useState<PayrollRun | null>(null)
 
-  // Load all data from Supabase on startup
   useEffect(() => {
     Promise.all([fetchEmployees(), fetchPayrollRuns(), fetchBusinessInfo()])
       .then(([emps, runs, info]) => {
@@ -97,10 +97,12 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-100">
+      <div className="flex h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="text-6xl mb-4">⏳</div>
-          <p className="text-2xl font-semibold text-gray-700">Loading PayPilot...</p>
+          <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-white font-bold text-xl mx-auto mb-4 animate-pulse">
+            PP
+          </div>
+          <p className="text-xl font-semibold text-gray-700">Loading PayPilot...</p>
         </div>
       </div>
     )
@@ -108,16 +110,16 @@ export default function App() {
 
   if (loadError) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-100">
-        <div className="bg-white rounded-2xl p-8 max-w-md text-center shadow-md">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Could not connect</h2>
-          <p className="text-gray-600 text-lg mb-6">
-            Could not connect to the database. Check your internet connection and try again.
+      <div className="flex h-screen items-center justify-center bg-gray-50 p-4">
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-md border border-gray-100">
+          <div className="text-5xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Could not load data</h2>
+          <p className="text-gray-500 text-lg mb-6">
+            Something went wrong loading the app. Please try again.
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3 px-6 font-semibold text-lg"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 px-6 font-semibold text-lg transition-colors"
           >
             Try Again
           </button>
@@ -193,11 +195,23 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-100">
-      <Sidebar currentPage={currentPage} onNavigate={navigateTo} dadMode={dadMode} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header businessName={businessInfo.businessName} />
-        <main className="flex-1 overflow-y-auto p-6">{renderPage()}</main>
+    <div className="flex h-screen overflow-hidden bg-gray-50">
+      <Sidebar
+        currentPage={currentPage}
+        onNavigate={navigateTo}
+        dadMode={dadMode}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        <Header
+          ownerName={businessInfo.ownerName}
+          businessName={businessInfo.businessName}
+          onMenuToggle={() => setSidebarOpen(prev => !prev)}
+        />
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+          {renderPage()}
+        </main>
       </div>
     </div>
   )

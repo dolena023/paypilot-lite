@@ -12,17 +12,9 @@ interface Props {
   onNavigate: (page: Page) => void
 }
 
-export default function ReviewPrint({
-  entries,
-  weekOf,
-  dadMode,
-  isHistorical,
-  onSavePayroll,
-  onNavigate,
-}: Props) {
+export default function ReviewPrint({ entries, weekOf, dadMode, isHistorical, onSavePayroll, onNavigate }: Props) {
   const [showConfirm, setShowConfirm] = useState(false)
   const [saved, setSaved] = useState(false)
-
   const total = calculatePayrollTotals(entries)
 
   function handleSave() {
@@ -31,20 +23,18 @@ export default function ReviewPrint({
     setShowConfirm(false)
   }
 
+  const btnBase = `rounded-xl font-semibold transition-colors ${dadMode ? 'py-3.5 px-6 text-lg' : 'py-2.5 px-5 text-base'}`
+
   if (entries.length === 0) {
     return (
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-6">
-          <h2 className={`font-bold text-gray-800 ${dadMode ? 'text-4xl' : 'text-3xl'}`}>Review & Print</h2>
-        </div>
-        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
-          <p className={`text-yellow-800 ${dadMode ? 'text-xl' : 'text-lg'}`}>
+      <div className="max-w-3xl mx-auto space-y-5">
+        <h2 className="text-3xl font-bold text-gray-800">Review & Print</h2>
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
+          <p className={`text-amber-800 ${dadMode ? 'text-xl' : 'text-lg'}`}>
             No hours entered yet. Go to "Enter Hours" first.
           </p>
-          <button
-            onClick={() => onNavigate('enter-hours')}
-            className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl py-3 px-6 font-semibold text-lg"
-          >
+          <button onClick={() => onNavigate('enter-hours')}
+            className="mt-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl py-3 px-5 font-semibold text-base transition-colors">
             Go to Enter Hours
           </button>
         </div>
@@ -52,86 +42,76 @@ export default function ReviewPrint({
     )
   }
 
-  const btnBase = `rounded-2xl font-bold shadow-md transition-colors ${dadMode ? 'text-xl py-4 px-6' : 'text-lg py-3 px-5'}`
-
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Page header */}
-      <div className="no-print mb-6">
-        <h2 className={`font-bold text-gray-800 ${dadMode ? 'text-4xl' : 'text-3xl'}`}>Review & Print</h2>
-        {dadMode && (
-          <p className="text-gray-500 text-xl mt-1">Print this page, then write the checks.</p>
-        )}
+    <div className="max-w-4xl mx-auto space-y-5">
+      {/* Header */}
+      <div className="no-print">
+        <h2 className="text-3xl font-bold text-gray-800">Review & Print</h2>
+        {dadMode && <p className="text-gray-500 text-xl mt-1">Print this page, then write the checks.</p>}
       </div>
 
-      {/* Save success banner */}
+      {/* Success banner */}
       {saved && (
-        <div className="no-print bg-green-50 border border-green-200 rounded-2xl p-5 mb-6">
-          <p className={`text-green-700 font-semibold ${dadMode ? 'text-xl' : 'text-lg'}`}>
-            ✅ Payroll saved. You can print your check sheet now.
+        <div className="no-print bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center gap-3">
+          <span className="text-2xl">✅</span>
+          <p className={`text-emerald-700 font-semibold ${dadMode ? 'text-xl' : 'text-lg'}`}>
+            Payroll saved. You can print your check sheet now.
           </p>
         </div>
       )}
 
       {isHistorical && (
-        <div className="no-print bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-6">
-          <p className={`text-blue-700 ${dadMode ? 'text-xl' : 'text-lg'}`}>
-            Viewing saved payroll — Week of {weekOf}
+        <div className="no-print bg-blue-50 border border-blue-100 rounded-2xl p-4">
+          <p className={`text-blue-700 ${dadMode ? 'text-lg' : 'text-base'}`}>
+            📋 Viewing saved payroll — Week of {weekOf}
           </p>
         </div>
       )}
 
       {/* Action buttons */}
-      <div className="no-print flex flex-wrap gap-3 mb-6">
-        <button onClick={() => window.print()} className={`bg-blue-600 hover:bg-blue-700 text-white ${btnBase}`}>
+      <div className="no-print flex flex-wrap gap-3">
+        <button onClick={() => window.print()}
+          className={`bg-blue-600 hover:bg-blue-700 text-white ${btnBase} shadow-sm`}>
           🖨️ Print Check Sheet
         </button>
         {!isHistorical && !saved && (
-          <button
-            onClick={() => setShowConfirm(true)}
-            className={`bg-green-600 hover:bg-green-700 text-white ${btnBase}`}
-          >
+          <button onClick={() => setShowConfirm(true)}
+            className={`bg-emerald-600 hover:bg-emerald-700 text-white ${btnBase} shadow-sm`}>
             💾 Save Weekly Payroll
           </button>
         )}
-        <button
-          onClick={() => exportWeeklyPayrollCSV(entries, weekOf)}
-          className={`bg-gray-600 hover:bg-gray-700 text-white ${btnBase}`}
-        >
+        <button onClick={() => exportWeeklyPayrollCSV(entries, weekOf)}
+          className={`bg-gray-600 hover:bg-gray-700 text-white ${btnBase}`}>
           📥 Export CSV
         </button>
-        <button
-          onClick={() => onNavigate(isHistorical ? 'past-payrolls' : 'enter-hours')}
-          className={`bg-gray-200 hover:bg-gray-300 text-gray-700 ${btnBase}`}
-        >
+        <button onClick={() => onNavigate(isHistorical ? 'past-payrolls' : 'enter-hours')}
+          className={`bg-gray-100 hover:bg-gray-200 text-gray-700 ${btnBase}`}>
           ← {isHistorical ? 'Back to Past Payrolls' : 'Back to Edit Hours'}
         </button>
       </div>
 
-      {/* Confirm save modal */}
+      {/* Confirm modal */}
       {showConfirm && (
-        <div className="no-print fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="no-print fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-xl">
-            <h3 className={`font-bold text-gray-800 mb-3 ${dadMode ? 'text-2xl' : 'text-xl'}`}>
-              Save This Payroll?
-            </h3>
-            <p className={`text-gray-600 mb-6 ${dadMode ? 'text-xl' : 'text-lg'}`}>
+            <h3 className={`font-bold text-gray-800 mb-2 ${dadMode ? 'text-2xl' : 'text-xl'}`}>Save This Payroll?</h3>
+            <p className={`text-gray-500 mb-3 ${dadMode ? 'text-lg' : 'text-base'}`}>
               Are you sure you want to save this week's payroll?
             </p>
-            <p className={`text-gray-800 font-semibold mb-6 ${dadMode ? 'text-xl' : 'text-lg'}`}>
-              Week of {weekOf} · {entries.length} employees · ${total.toFixed(2)} total
-            </p>
+            <div className="bg-gray-50 rounded-xl p-4 mb-6">
+              <p className={`text-gray-800 font-semibold ${dadMode ? 'text-lg' : 'text-base'}`}>
+                📅 Week of {weekOf}<br />
+                👥 {entries.length} employees<br />
+                💵 ${total.toFixed(2)} total
+              </p>
+            </div>
             <div className="flex gap-3">
-              <button
-                onClick={handleSave}
-                className={`bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold ${dadMode ? 'py-4 px-6 text-xl' : 'py-3 px-5 text-lg'}`}
-              >
+              <button onClick={handleSave}
+                className={`bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold ${dadMode ? 'py-4 px-6 text-xl' : 'py-3 px-5 text-base'}`}>
                 Yes, Save It
               </button>
-              <button
-                onClick={() => setShowConfirm(false)}
-                className={`bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold ${dadMode ? 'py-4 px-6 text-xl' : 'py-3 px-5 text-lg'}`}
-              >
+              <button onClick={() => setShowConfirm(false)}
+                className={`bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold ${dadMode ? 'py-4 px-6 text-xl' : 'py-3 px-5 text-base'}`}>
                 Go Back
               </button>
             </div>
@@ -139,51 +119,50 @@ export default function ReviewPrint({
         </div>
       )}
 
-      {/* ===== PRINT AREA — CHECK SHEET ===== */}
-      <div className="print-area bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-        <div className="mb-6 pb-5 border-b-2 border-gray-800">
-          <h3 className="text-2xl font-bold text-gray-800">Payroll Check Sheet</h3>
-          <p className="text-gray-600 text-lg mt-1">Week of: {weekOf}</p>
-          <p className="text-gray-600 text-lg">
-            {entries.length} employees &nbsp;·&nbsp; Total: ${total.toFixed(2)}
-          </p>
+      {/* ===== PRINT AREA ===== */}
+      <div className="print-area bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Print header */}
+        <div className="bg-slate-900 text-white px-8 py-5">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h3 className="text-2xl font-bold">Payroll Check Sheet</h3>
+              <p className="text-slate-300 text-sm mt-0.5">Week of: {weekOf}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-slate-300 text-sm">{entries.length} employees</p>
+              <p className="text-2xl font-bold text-emerald-400">${total.toFixed(2)}</p>
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-0">
+        {/* Check rows */}
+        <div className="divide-y divide-gray-100">
           {entries.map((entry, i) => (
-            <div
-              key={entry.employeeId}
-              className={`flex items-center gap-3 py-5 ${i < entries.length - 1 ? 'border-b border-gray-200' : ''}`}
-            >
-              {/* Checkbox */}
-              <div className="w-7 h-7 border-2 border-gray-800 rounded flex-shrink-0" />
-              <span className="text-gray-600 font-medium text-lg flex-shrink-0">Paid</span>
-
-              {/* Name */}
-              <span className="font-bold text-gray-800 text-xl w-44 flex-shrink-0">{entry.employeeName}</span>
-
-              {/* Amount */}
-              <span className="font-bold text-green-700 text-2xl w-28 flex-shrink-0">
+            <div key={entry.employeeId} className={`px-6 py-5 flex items-center gap-4 flex-wrap ${i % 2 === 1 ? 'bg-gray-50/50' : ''}`}>
+              <div className="w-6 h-6 border-2 border-gray-700 rounded flex-shrink-0" />
+              <span className="text-gray-500 text-sm font-medium flex-shrink-0">Paid</span>
+              <span className={`font-bold text-gray-800 w-40 flex-shrink-0 ${dadMode ? 'text-lg' : 'text-base'}`}>
+                {entry.employeeName}
+              </span>
+              <span className={`font-bold text-emerald-700 w-24 flex-shrink-0 ${dadMode ? 'text-xl' : 'text-lg'}`}>
                 ${entry.netPay.toFixed(2)}
               </span>
-
-              {/* Check # */}
-              <span className="text-gray-600 text-lg flex-shrink-0">Check #:</span>
-              <div className="w-24 flex-shrink-0 border-b-2 border-gray-400" style={{ height: '26px' }} />
-
-              {/* Notes */}
-              <span className="text-gray-600 text-lg flex-shrink-0">Notes:</span>
-              <div className="flex-1 border-b-2 border-gray-400" style={{ height: '26px' }} />
+              <span className="text-gray-400 text-sm flex-shrink-0">Check #:</span>
+              <div className="w-24 flex-shrink-0 border-b-2 border-gray-300" style={{ height: '24px' }} />
+              <span className="text-gray-400 text-sm flex-shrink-0">Notes:</span>
+              <div className="flex-1 min-w-[80px] border-b-2 border-gray-300" style={{ height: '24px' }} />
             </div>
           ))}
         </div>
 
-        <div className="mt-6 pt-5 border-t-2 border-gray-800 flex justify-between items-center">
-          <span className="text-xl font-bold text-gray-800">Total Checks:</span>
-          <span className="text-3xl font-bold text-green-700">${total.toFixed(2)}</span>
+        {/* Total row */}
+        <div className="px-6 py-5 border-t-2 border-gray-800 bg-gray-50 flex justify-between items-center">
+          <span className={`font-bold text-gray-800 ${dadMode ? 'text-xl' : 'text-lg'}`}>Total Checks:</span>
+          <span className={`font-bold text-emerald-700 ${dadMode ? 'text-3xl' : 'text-2xl'}`}>${total.toFixed(2)}</span>
         </div>
 
-        <div className="mt-8 pt-4 border-t border-gray-200">
+        {/* Disclaimer */}
+        <div className="px-6 py-3 border-t border-gray-100">
           <p className="text-xs text-gray-400 text-center">
             This app calculates payroll only. It does not file taxes or send payments.
           </p>
