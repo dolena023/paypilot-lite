@@ -1,112 +1,43 @@
-import { supabase, supabaseConfigured } from '../lib/supabase'
 import type { Employee, PayrollRun, BusinessInfo } from '../types'
 
-// ── Employees ────────────────────────────────────────────────────────────────
+const KEYS = {
+  EMPLOYEES: 'paypilot_employees',
+  PAYROLL_RUNS: 'paypilot_payroll_runs',
+  BUSINESS_INFO: 'paypilot_business_info',
+}
+
+// ── Employees ─────────────────────────────────────────────────────────────────
 
 export async function fetchEmployees(): Promise<Employee[]> {
-  if (!supabaseConfigured) return []
-  const { data, error } = await supabase
-    .from('employees')
-    .select('*')
-    .order('created_at', { ascending: true })
-  if (error) throw error
-  return (data ?? []).map(r => ({
-    id: r.id,
-    name: r.name,
-    payType: r.pay_type,
-    hourlyRate: r.hourly_rate,
-    weeklySalary: r.weekly_salary,
-    notes: r.notes,
-    active: r.active,
-  }))
+  const data = localStorage.getItem(KEYS.EMPLOYEES)
+  return data ? (JSON.parse(data) as Employee[]) : []
 }
 
 export async function persistEmployees(employees: Employee[]): Promise<void> {
-  if (!supabaseConfigured) return
-  const { data: existing } = await supabase.from('employees').select('id')
-  const existingIds = (existing ?? []).map(r => r.id as string)
-  const keepIds = new Set(employees.map(e => e.id))
-
-  // Delete removed employees
-  for (const id of existingIds) {
-    if (!keepIds.has(id)) {
-      await supabase.from('employees').delete().eq('id', id)
-    }
-  }
-
-  // Upsert current list
-  if (employees.length > 0) {
-    const { error } = await supabase.from('employees').upsert(
-      employees.map(e => ({
-        id: e.id,
-        name: e.name,
-        pay_type: e.payType,
-        hourly_rate: e.hourlyRate,
-        weekly_salary: e.weeklySalary,
-        notes: e.notes,
-        active: e.active,
-      }))
-    )
-    if (error) throw error
-  }
+  localStorage.setItem(KEYS.EMPLOYEES, JSON.stringify(employees))
 }
 
-// ── Payroll Runs ─────────────────────────────────────────────────────────────
+// ── Payroll Runs ──────────────────────────────────────────────────────────────
 
 export async function fetchPayrollRuns(): Promise<PayrollRun[]> {
-  if (!supabaseConfigured) return []
-  const { data, error } = await supabase
-    .from('payroll_runs')
-    .select('*')
-    .order('created_at', { ascending: true })
-  if (error) throw error
-  return (data ?? []).map(r => ({
-    id: r.id,
-    weekOf: r.week_of,
-    dateSaved: r.date_saved,
-    entries: r.entries,
-    totalAmount: r.total_amount,
-    employeeCount: r.employee_count,
-  }))
+  const data = localStorage.getItem(KEYS.PAYROLL_RUNS)
+  return data ? (JSON.parse(data) as PayrollRun[]) : []
 }
 
 export async function persistPayrollRun(run: PayrollRun): Promise<void> {
-  if (!supabaseConfigured) return
-  const { error } = await supabase.from('payroll_runs').insert({
-    id: run.id,
-    week_of: run.weekOf,
-    date_saved: run.dateSaved,
-    entries: run.entries,
-    total_amount: run.totalAmount,
-    employee_count: run.employeeCount,
-  })
-  if (error) throw error
+  const existing = await fetchPayrollRuns()
+  localStorage.setItem(KEYS.PAYROLL_RUNS, JSON.stringify([...existing, run]))
 }
 
 // ── Business Info ─────────────────────────────────────────────────────────────
 
 export async function fetchBusinessInfo(): Promise<BusinessInfo> {
-  if (!supabaseConfigured) return { businessName: '', ownerName: '', dadMode: true }
-  const { data, error } = await supabase
-    .from('business_info')
-    .select('*')
-    .eq('id', 1)
-    .single()
-  if (error) return { businessName: '', ownerName: '', dadMode: true }
-  return {
-    businessName: data.business_name,
-    ownerName: data.owner_name,
-    dadMode: data.dad_mode,
-  }
+  const data = localStorage.getItem(KEYS.BUSINESS_INFO)
+  return data
+    ? (JSON.parse(data) as BusinessInfo)
+    : { businessName: '', ownerName: '', dadMode: true }
 }
 
 export async function persistBusinessInfo(info: BusinessInfo): Promise<void> {
-  if (!supabaseConfigured) return
-  const { error } = await supabase.from('business_info').upsert({
-    id: 1,
-    business_name: info.businessName,
-    owner_name: info.ownerName,
-    dad_mode: info.dadMode,
-  })
-  if (error) throw error
+  localStorage.setItem(KEYS.BUSINESS_INFO, JSON.stringify(info))
 }
