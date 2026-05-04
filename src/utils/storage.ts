@@ -1,9 +1,10 @@
-import { supabase } from '../lib/supabase'
+import { supabase, supabaseConfigured } from '../lib/supabase'
 import type { Employee, PayrollRun, BusinessInfo } from '../types'
 
 // ── Employees ────────────────────────────────────────────────────────────────
 
 export async function fetchEmployees(): Promise<Employee[]> {
+  if (!supabaseConfigured) return []
   const { data, error } = await supabase
     .from('employees')
     .select('*')
@@ -21,6 +22,7 @@ export async function fetchEmployees(): Promise<Employee[]> {
 }
 
 export async function persistEmployees(employees: Employee[]): Promise<void> {
+  if (!supabaseConfigured) return
   const { data: existing } = await supabase.from('employees').select('id')
   const existingIds = (existing ?? []).map(r => r.id as string)
   const keepIds = new Set(employees.map(e => e.id))
@@ -52,6 +54,7 @@ export async function persistEmployees(employees: Employee[]): Promise<void> {
 // ── Payroll Runs ─────────────────────────────────────────────────────────────
 
 export async function fetchPayrollRuns(): Promise<PayrollRun[]> {
+  if (!supabaseConfigured) return []
   const { data, error } = await supabase
     .from('payroll_runs')
     .select('*')
@@ -68,6 +71,7 @@ export async function fetchPayrollRuns(): Promise<PayrollRun[]> {
 }
 
 export async function persistPayrollRun(run: PayrollRun): Promise<void> {
+  if (!supabaseConfigured) return
   const { error } = await supabase.from('payroll_runs').insert({
     id: run.id,
     week_of: run.weekOf,
@@ -82,6 +86,7 @@ export async function persistPayrollRun(run: PayrollRun): Promise<void> {
 // ── Business Info ─────────────────────────────────────────────────────────────
 
 export async function fetchBusinessInfo(): Promise<BusinessInfo> {
+  if (!supabaseConfigured) return { businessName: '', ownerName: '', dadMode: true }
   const { data, error } = await supabase
     .from('business_info')
     .select('*')
@@ -96,6 +101,7 @@ export async function fetchBusinessInfo(): Promise<BusinessInfo> {
 }
 
 export async function persistBusinessInfo(info: BusinessInfo): Promise<void> {
+  if (!supabaseConfigured) return
   const { error } = await supabase.from('business_info').upsert({
     id: 1,
     business_name: info.businessName,
